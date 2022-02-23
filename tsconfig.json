@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"outDir": "./dist/",
+		"sourceMap": true,
+		"lib": [
+			"dom",
+			"es2015",
+			"esnext"
+		],
+		"paths": {
+			"@root/*": ["src/*"]
+		},
+		"skipLibCheck": true,
+		"module": "commonjs",
+		"moduleResolution": "Node",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"noImplicitAny": false,
+		"target": "ESNext"
+	},
+	"files": [
+		"custom.d.ts"
+	],
+	"include": [
+		"custom.d.ts",
+		"src/**/*"
+	]
+}
