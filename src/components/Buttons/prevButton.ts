@@ -3,7 +3,7 @@ import {InteractionButtonsCustomIdList} from '@root/interactions/audio/Interacti
 
 const prevButton = () => new MessageButton()
     .setCustomId(InteractionButtonsCustomIdList.prev)
-    .setLabel('Prev')
+    .setLabel('⏪ Prev')
     .setStyle('PRIMARY')
 
 export default prevButton()

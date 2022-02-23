@@ -1,6 +1,8 @@
 import {AudioPlayerStatus, createAudioPlayer} from '@discordjs/voice'
 
-import nextAudio from "@root/commands/audio/nextAudio";
+import PlayerUserInterface from './PlayerUserInterface'
+
+import nextAudio from '@root/commands/audio/nextAudio'
 
 import {filterObjectByKeys} from '@root/helpers'
 
@@ -12,7 +14,7 @@ import {GuildsList} from './types'
 class GuildsListForAudio {
     guildsList: GuildsList
 
-    constructor(guildsList?) {
+    constructor(guildsList?: GuildsList) {
         this.guildsList = guildsList || {}
     }
 
@@ -27,6 +29,7 @@ class GuildsListForAudio {
             audioHistoryIdList: [],
             guildAudioIdList: [],
             audioPlayer: createAudioPlayer(),
+            playerUserInterface: new PlayerUserInterface(),
             lastUpdateDate: new Date(),
         }
 
@@ -36,30 +39,32 @@ class GuildsListForAudio {
     private setHandlersOnAudioPlayer(guildId: GuildId) {
         const guild = this.guildsList[guildId]
 
-        guild.audioPlayer.on(AudioPlayerStatus.Idle, () => {
-            nextAudio(guildId, this)
+        guild.audioPlayer.on(AudioPlayerStatus.Idle, async () => {
+            await nextAudio(guildId, this)
         })
     }
 
     addAudioIdList(guildId: GuildId, guildAudioIdList: AudioId[]): void {
         this.setNewLastUpdateDate(guildId)
 
-        const guildParams = this.guildsList[guildId]
+        const guild = this.guildsList[guildId]
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             currentAudioIndex: 0,
             guildAudioIdList,
         }
 
         this.addAudioIdToHistory(guildId, guildAudioIdList[0])
+
+        this.checkButtonsIsDisabled(guildId)
     }
 
     private addAudioIdToHistory(guildId: GuildId, audioId: AudioId): void {
         this.setNewLastUpdateDate(guildId)
 
-        const guildParams = this.guildsList[guildId]
-        const {audioHistoryIdList, currentHistoryIndex, currentAudioIndex} = guildParams
+        const guild = this.guildsList[guildId]
+        const {audioHistoryIdList, currentHistoryIndex, currentAudioIndex} = guild
 
         const prevAudioHistoryIdList = audioHistoryIdList || []
         if (prevAudioHistoryIdList.length === MAX_AUDIO_HISTORY_ID_LIST_LENGTH) {
@@ -67,7 +72,7 @@ class GuildsListForAudio {
         }
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             currentHistoryIndex: currentHistoryIndex || 0,
             currentAudioIndex: currentAudioIndex || 0,
             audioHistoryIdList: [...prevAudioHistoryIdList, audioId],
@@ -75,88 +80,108 @@ class GuildsListForAudio {
     }
 
     private setNextCurrentAudioIndex(guildId: GuildId): true | void {
-        const guildParams = this.guildsList[guildId]
-        const {currentAudioIndex} = guildParams
+        const guild = this.guildsList[guildId]
+        const {currentAudioIndex} = guild
 
         if (currentAudioIndex === MAX_AUDIO_ID_LIST_LENGTH - 1) {
             return true
         }
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             currentAudioIndex: currentAudioIndex + 1,
         }
+
+        this.checkButtonsIsDisabled(guildId)
     }
 
     setNextCurrentHistoryIndex(guildId: GuildId): true | void {
         this.setNewLastUpdateDate(guildId)
 
         {
-            const guildParams = this.guildsList[guildId]
+            const guild = this.guildsList[guildId]
             const {
                 currentHistoryIndex,
                 audioHistoryIdList,
-                currentAudioIndex: prevAudioIndex,
                 guildAudioIdList
-            } = guildParams
-
-            let isFailed
+            } = guild
 
             if (currentHistoryIndex === audioHistoryIdList.length - 1) {
-                isFailed = this.setNextCurrentAudioIndex(guildId)
+                const isFailed = this.setNextCurrentAudioIndex(guildId)
+
+                if (isFailed) {
+                    return true
+                }
             }
 
             const {currentAudioIndex} = this.guildsList[guildId]
 
-            if (currentAudioIndex !== prevAudioIndex) {
-                this.addAudioIdToHistory(guildId, guildAudioIdList[currentAudioIndex])
-            }
-
-            if (isFailed) {
-                return true
-            }
+            this.addAudioIdToHistory(guildId, guildAudioIdList[currentAudioIndex])
         }
 
-        const guildParams = this.guildsList[guildId]
-        const {currentHistoryIndex} = guildParams
+        const guild = this.guildsList[guildId]
+        const {currentHistoryIndex} = guild
 
         const nextHistoryIndex = currentHistoryIndex === MAX_AUDIO_HISTORY_ID_LIST_LENGTH - 1
             ? currentHistoryIndex
             : currentHistoryIndex + 1
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             currentHistoryIndex: nextHistoryIndex,
         }
+
+        this.checkButtonsIsDisabled(guildId)
     }
 
     setPrevCurrentHistoryIndex(guildId: GuildId): true | void {
         this.setNewLastUpdateDate(guildId)
 
-        const guildParams = this.guildsList[guildId]
-        const {currentHistoryIndex} = guildParams
+        const guild = this.guildsList[guildId]
+        const {currentHistoryIndex} = guild
 
         if (currentHistoryIndex === 0) {
             return true
         }
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             currentHistoryIndex: currentHistoryIndex - 1,
         }
+
+        this.checkButtonsIsDisabled(guildId)
     }
 
-    deleteGuildIdList(guildId: GuildId): void {
+    deleteGuild(guildId: GuildId): void {
         this.guildsList = <GuildsList>filterObjectByKeys(this.guildsList, guildId)
     }
 
     private setNewLastUpdateDate(guildId: GuildId): void {
-        const guildParams = this.guildsList[guildId]
+        const guild = this.guildsList[guildId]
 
         this.guildsList[guildId] = {
-            ...guildParams,
+            ...guild,
             lastUpdateDate: new Date(),
         }
+    }
+
+    private checkButtonsIsDisabled(guildId: GuildId): void {
+        const guild = this.guildsList[guildId]
+
+        const {
+            playerUserInterface,
+            currentAudioIndex,
+            currentHistoryIndex,
+            audioHistoryIdList,
+        } = guild
+
+        const nextButtonIsDisabled = currentAudioIndex === MAX_AUDIO_ID_LIST_LENGTH - 1
+            && currentHistoryIndex === audioHistoryIdList.length - 1
+
+        const prevButtonIsDisabled = currentHistoryIndex === 0
+
+        playerUserInterface.setDisableNextButton(nextButtonIsDisabled)
+        playerUserInterface.setDisablePrevButton(prevButtonIsDisabled)
     }
 }
 

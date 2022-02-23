@@ -1,10 +1,10 @@
-import { AudioPlayer } from '@discordjs/voice'
+import {AudioPlayer} from '@discordjs/voice'
 
 
 type UnpauseAudio = (audioPlayer: AudioPlayer) => void
 
 const unpauseAudio: UnpauseAudio = audioPlayer => {
-	audioPlayer.unpause()
+    audioPlayer.unpause()
 }
 
 export default unpauseAudio

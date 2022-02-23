@@ -3,7 +3,7 @@ import {InteractionButtonsCustomIdList} from '@root/interactions/audio/Interacti
 
 const nextButton = () => new MessageButton()
     .setCustomId(InteractionButtonsCustomIdList.next)
-    .setLabel('Next')
+    .setLabel('Next ⏩')
     .setStyle('PRIMARY')
 
 export default nextButton()

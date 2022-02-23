@@ -1,13 +1,12 @@
-import {ButtonInteraction, Client, Intents, Interaction, Message, MessageInteraction} from 'discord.js'
+import {ButtonInteraction, Client, Intents, Message} from 'discord.js'
 
-import {GuildsListForAudio} from "@root/classes/audio";
+import {GuildsListForAudio} from '@root/classes/audio'
 
 import AudioCommands from '@root/commands/audio'
 import AudioInteractions from '@root/interactions/audio'
 
 import {token} from '@root/config'
-import EventObserver from "@root/classes/common/EventObserver";
-import PlayerEmbed from "@root/classes/audio/PlayerEmbed";
+import {destroyChannelConnection, deleteAbandonedGuilds} from '@root/modules/common'
 
 const client = new Client({
     intents: [
@@ -18,24 +17,33 @@ const client = new Client({
 })
 
 const guildsListForAudio = new GuildsListForAudio()
-const interactionObserver = new EventObserver()
-const playerEmbed = new PlayerEmbed()
+
+deleteAbandonedGuilds(guildsListForAudio)
 
 client.on('ready', () => console.log('Bot has been started...'))
-client.on('message', (req: Message) => AudioCommands(
-    req,
-    {
-        guildsListForAudio,
-        interactionObserver,
-        playerEmbed,
+
+client.on('voiceStateUpdate', nextState => {
+    if (!nextState.guild.me.voice.channelId) {
+        const guildId = nextState.guild.id
+        const guild = guildsListForAudio.guildsList[guildId]
+
+        if (guildId) {
+            destroyChannelConnection(guildId)
+        }
+
+        guild?.playerUserInterface.deletePlayer()
+        guild?.audioPlayer.stop()
     }
+})
+
+client.on('messageCreate', (req: Message) => AudioCommands(
+    req,
+    guildsListForAudio,
 ))
+
 client.on('interactionCreate', (req: ButtonInteraction) => AudioInteractions(
     req,
-    {
-        guildsListForAudio,
-        interactionObserver,
-    }
+    guildsListForAudio,
 ))
 
 client.login(token)

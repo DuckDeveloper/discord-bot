@@ -3,7 +3,7 @@ import {InteractionButtonsCustomIdList} from '@root/interactions/audio/Interacti
 
 const stopButton = () => new MessageButton()
     .setCustomId(InteractionButtonsCustomIdList.stop)
-    .setLabel('Stop')
-    .setStyle('PRIMARY')
+    .setLabel('Stop ❌')
+    .setStyle('DANGER')
 
 export default stopButton()

@@ -12,7 +12,7 @@ interface Params {
     guildsListForAudio: GuildsListForAudio
 }
 
-type PlayAudio = (req: Message, params: Params) => void
+type PlayAudio = (req: Message, params: Params) => Promise<void>
 
 const playAudio: PlayAudio = async (req, {args, guildId, guildsListForAudio}) => {
     if (!args.length) {
@@ -26,7 +26,9 @@ const playAudio: PlayAudio = async (req, {args, guildId, guildsListForAudio}) =>
     const {items: audioIdList} = await getAudioFromYoutube(args.join(' ')) || {}
 
     if (!audioIdList) {
-        return req.channel.send('Случилось что-то непредвиденное...')
+        req.channel.send('Случилось что-то непредвиденное...')
+
+        return
     }
 
     guildsListForAudio.addAudioIdList(guildId, audioIdList.map(item => item.id.videoId))

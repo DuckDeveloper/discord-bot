@@ -1,11 +1,9 @@
-import {AudioPlayer} from '@discordjs/voice'
-
 import {getAudioResource} from '@root/modules/audio'
 
 import {GuildId} from '@root/types'
 import GuildsListForAudio from '@root/classes/audio/GuildsListForAudio'
 
-type NextAudio = (guildId: GuildId, guildsListForAudio: GuildsListForAudio) => void
+type NextAudio = (guildId: GuildId, guildsListForAudio: GuildsListForAudio) => Promise<void>
 
 const nextAudio: NextAudio = async (guildId, guildsListForAudio) => {
     const isFailed = guildsListForAudio.setNextCurrentHistoryIndex(guildId)

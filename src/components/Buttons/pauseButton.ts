@@ -3,7 +3,7 @@ import {InteractionButtonsCustomIdList} from '@root/interactions/audio/Interacti
 
 const pauseButton = () => new MessageButton()
     .setCustomId(InteractionButtonsCustomIdList.pause)
-    .setLabel('Pause')
-    .setStyle('PRIMARY')
+    .setLabel('Pause ⏸')
+    .setStyle('SECONDARY')
 
 export default pauseButton()
