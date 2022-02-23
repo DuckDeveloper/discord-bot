@@ -1,7 +1,6 @@
 import {Message} from 'discord.js'
 
 import {GuildsListForAudio} from '@root/classes/audio'
-import EventObserver from "@root/classes/common/EventObserver";
 
 import playAudio from './playAudio'
 import stopAudio from './stopAudio'
@@ -11,18 +10,11 @@ import nextAudio from './nextAudio'
 import prevAudio from './prevAudio'
 
 import {messageIsNotValid, getArgsAndCommand, toCapitalize} from '@root/helpers'
-import {GuildId} from "@root/types";
-import PlayerEmbed from "@root/classes/audio/PlayerEmbed";
+import {GuildId} from '@root/types'
 
-interface Params {
-    guildsListForAudio: GuildsListForAudio,
-    interactionObserver: EventObserver,
-    playerEmbed: PlayerEmbed,
-}
+type AudioCommands = (req: Message, guildsListForAudio: GuildsListForAudio) => Promise<void>
 
-type AudioCommands = (req: Message, params: Params) => void
-
-const AudioCommands: AudioCommands = (req, {guildsListForAudio, interactionObserver, playerEmbed}) => {
+const AudioCommands: AudioCommands = async (req, guildsListForAudio) => {
     if (messageIsNotValid(req)) {
         return
     }
@@ -31,7 +23,9 @@ const AudioCommands: AudioCommands = (req, {guildsListForAudio, interactionObser
 
     const guildId: GuildId | undefined = req.member.voice.channel?.guildId
     if (!guildId) {
-        return req.channel.send(`${toCapitalize(req.author.username)}, подключитесь к каналу...`)
+        req.channel.send(`${toCapitalize(req.author.username)}, подключитесь к каналу...`)
+
+        return
     }
 
     guildsListForAudio.initGuild(guildId)
@@ -39,36 +33,38 @@ const AudioCommands: AudioCommands = (req, {guildsListForAudio, interactionObser
 
     switch (command) {
         case 'play':
-            playerEmbed.initRequest(req)
+            await playAudio(req, {args, guildId, guildsListForAudio})
 
-            playAudio(req, {args, guildId, guildsListForAudio})
-            playerEmbed.createPlayer()
-            interactionObserver.subscribe(playerEmbed.editPlayer.bind(playerEmbed))
+            guild.playerUserInterface.init(req)
+            await guild.playerUserInterface.createPlayer()
 
-            break
+            return
         case 'pause':
             pauseAudio(guild.audioPlayer)
+            guild.playerUserInterface.togglePause()
 
             break
         case 'unpause':
             unpauseAudio(guild.audioPlayer)
+            guild.playerUserInterface.togglePause()
 
             break
         case 'stop':
             stopAudio(guildId, guildsListForAudio)
 
-            break
+            return
         case 'next':
-            nextAudio(guildId, guildsListForAudio)
+            await nextAudio(guildId, guildsListForAudio)
 
             break
         case 'prev':
-            prevAudio(guildId, guildsListForAudio)
+            await prevAudio(guildId, guildsListForAudio)
 
             break
         default:
             return
     }
+    await guild.playerUserInterface.updatePlayerUserInterface()
 }
 
 export default AudioCommands

@@ -3,7 +3,7 @@ import {AudioPlayer} from '@discordjs/voice'
 type PauseAudio = (audioPlayer: AudioPlayer) => void
 
 const pauseAudio: PauseAudio = audioPlayer => {
-	audioPlayer.pause()
+    audioPlayer.pause()
 }
 
 export default pauseAudio

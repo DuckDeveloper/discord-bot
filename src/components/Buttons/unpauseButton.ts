@@ -3,7 +3,7 @@ import {InteractionButtonsCustomIdList} from '@root/interactions/audio/Interacti
 
 const unpauseButton = () => new MessageButton()
     .setCustomId(InteractionButtonsCustomIdList.unpause)
-    .setLabel('Unpause')
-    .setStyle('PRIMARY')
+    .setLabel('Unpause ▶')
+    .setStyle('SECONDARY')
 
 export default unpauseButton()

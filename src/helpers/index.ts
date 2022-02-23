@@ -5,6 +5,7 @@ import isNullOrUndefined from './isNullOrUndefined'
 import toCapitalize from './toCapitalize'
 import filterObjectByKeys from './filterObjectByKeys'
 import interactionIsNotValid from './interactionIsNotValid'
+import getHoursFromMilliseconds from './getHoursFromMilliseconds'
 
 
 export {
@@ -15,4 +16,5 @@ export {
     toCapitalize,
     filterObjectByKeys,
     interactionIsNotValid,
+    getHoursFromMilliseconds,
 }

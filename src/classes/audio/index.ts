@@ -1,7 +1,9 @@
 import GuildsListForAudio from './GuildsListForAudio'
-import PlayerEmbed from "./PlayerEmbed";
+import PlayerUserInterface from './PlayerUserInterface'
+import {GuildForAudio} from './types'
 
 export {
     GuildsListForAudio,
-    PlayerEmbed,
+    PlayerUserInterface,
+    GuildForAudio,
 }

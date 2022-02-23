@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 
 import {buildUrlStringByQueryParams} from '@root/helpers'
 
-import {YOUTUBE_API_KEY, YOUTUBE_API_URL, MAX_AUDIO_ID_LIST_LENGTH} from '@root/config'
+import {YOUTUBE_API_KEYS, YOUTUBE_API_URL, MAX_AUDIO_ID_LIST_LENGTH} from '@root/config'
 
 import {AudioId} from '@root/types'
 
@@ -24,26 +24,49 @@ const getAudioFromYoutube: GetAudioFromYoutube = async (searchQuery) => {
         return
     }
 
-    const queryParams = {
-        part: 'snippet',
-        key: YOUTUBE_API_KEY,
-        type: 'video',
-        order: 'viewCount',
-        maxResults: MAX_AUDIO_ID_LIST_LENGTH,
-        q: searchQuery,
+    let apiKeyIndex = 0
+    let fetchIterateCount = 0
+    const MAX_FETCH_ITERATE_COUNT = 2
+
+    const fetchYoutubeAPI = async () => {
+        const queryParams = {
+            part: 'snippet',
+            key: YOUTUBE_API_KEYS[apiKeyIndex],
+            type: 'video',
+            order: 'viewCount',
+            maxResults: MAX_AUDIO_ID_LIST_LENGTH,
+            q: searchQuery,
+        }
+
+        const response = await fetch(buildUrlStringByQueryParams(YOUTUBE_API_URL, queryParams))
+        const data: Data = await response.json()
+
+        if (data.error) {
+            if (!apiKeyIndex) {
+                console.error(data)
+            }
+            apiKeyIndex++
+
+            if (apiKeyIndex === YOUTUBE_API_KEYS.length) {
+                apiKeyIndex = 0
+                fetchIterateCount++
+            }
+
+            if (fetchIterateCount === MAX_FETCH_ITERATE_COUNT) {
+                return false
+            }
+
+            return fetchYoutubeAPI()
+        }
+
+        return data
     }
+
+    const data = await fetchYoutubeAPI()
 
     const isShuffle = !!Math.round(Math.random())
 
-    const response = await fetch(buildUrlStringByQueryParams(YOUTUBE_API_URL, queryParams))
-    const data: Data = await response.json()
-
-    if (data.error) {
-        console.error(data)
-        return false
-    }
-
-    if (isShuffle) {
+    if (isShuffle && data) {
         data.items = data.items.sort(() => Math.random() - Math.random())
     }
 

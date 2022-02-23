@@ -3,6 +3,6 @@ import getAudioResource from './getAudioResource'
 
 
 export {
-	getAudioFromYoutube,
-	getAudioResource,
+    getAudioFromYoutube,
+    getAudioResource,
 }
