@@ -1,4 +1,8 @@
-import {token, YOUTUBE_API_KEYS} from './private'
+// import {token, YOUTUBE_API_KEYS} from './private'
+import 'dotenv/config'
+
+const token = process.env.token
+const YOUTUBE_API_KEYS = process.env.YOUTUBE_API_KEYS
 
 const prefix = '!'
 const YOUTUBE_URL = 'https://youtube.com/embed'
