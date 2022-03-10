@@ -3,7 +3,7 @@ import 'dotenv/config'
 
 const token = process.env.token
 const YOUTUBE_API_KEYS = JSON.parse(process.env.YOUTUBE_API_KEYS)
-console.log(process.env.YOUTUBE_API_KEYS, YOUTUBE_API_KEYS)
+console.log(process.env.PORT)
 const prefix = '!'
 const YOUTUBE_URL = 'https://youtube.com/embed'
 const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search'
