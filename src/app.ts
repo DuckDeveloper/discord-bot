@@ -1,11 +1,12 @@
 import {ButtonInteraction, Client, Intents, Message} from 'discord.js'
+import mongoose from 'mongoose'
 
 import {GuildsListForAudio} from '@root/classes/audio'
 
 import AudioCommands from '@root/commands/audio'
 import AudioInteractions from '@root/interactions/audio'
 
-import {token} from '@root/config'
+import {token, MONGO_URI, PORT} from '@root/config'
 import {destroyChannelConnection, deleteAbandonedGuilds} from '@root/modules/common'
 
 const client = new Client({
@@ -16,11 +17,17 @@ const client = new Client({
     ],
 })
 
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+})
+
 const guildsListForAudio = new GuildsListForAudio()
 
 deleteAbandonedGuilds(guildsListForAudio)
 
-client.on('ready', () => console.log('Bot has been started...'))
+client.on('ready', () => console.log(`Bot has been started on port ${PORT}...`))
 
 client.on('voiceStateUpdate', nextState => {
     if (!nextState.guild.me.voice.channelId) {
