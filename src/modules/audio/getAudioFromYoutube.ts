@@ -37,7 +37,7 @@ const getAudioFromYoutube: GetAudioFromYoutube = async (searchQuery) => {
             maxResults: MAX_AUDIO_ID_LIST_LENGTH,
             q: searchQuery,
         }
-
+        console.log(buildUrlStringByQueryParams(YOUTUBE_API_URL, queryParams))
         const response = await fetch(buildUrlStringByQueryParams(YOUTUBE_API_URL, queryParams))
         const data: Data = await response.json()
 
